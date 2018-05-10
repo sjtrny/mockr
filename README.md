@@ -8,7 +8,7 @@ MockMR provides an interface for defining and running MapReduce locally. Simply 
 
 MockMR defines the MockStreamingJob class which expects the input to be a byte stream of characters.
 
-The chunks of data are separated by newline ("\n") characters. Each line is sent to a seperate map worker.
+The chunks of data are separated by newline ("\n") characters. Each line is sent to a separate map worker.
 
 ### Native Python Jobs
 
