@@ -20,7 +20,7 @@ MockMR defines the MockPythonJob class which accepts a Python list as input. The
 
 ## Example Usage
 
-    from mockmr import MockPythonJob
+    from mockmr.mockmr import MockPythonJob
 
     class MyJob(MockPythonJob):
 
