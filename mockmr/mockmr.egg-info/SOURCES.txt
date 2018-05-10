@@ -1,5 +1,0 @@
-setup.py
-mockmr.egg-info/PKG-INFO
-mockmr.egg-info/SOURCES.txt
-mockmr.egg-info/dependency_links.txt
-mockmr.egg-info/top_level.txt
