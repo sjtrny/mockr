@@ -20,9 +20,9 @@ MockMR defines the MockPythonJob class which accepts a Python list as input. The
 
 ## Example Usage
 
-    from mockmr import MockStreamingJob
+    from mockmr import MockPythonJob
 
-    class MyJob(MockStreamingJob):
+    class MyJob(MockPythonJob):
 
         def map_fn(self, _, line):
             # Do a map process
