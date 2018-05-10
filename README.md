@@ -31,7 +31,12 @@ MockMR defines the MockPythonJob class which accepts a Python list as input. The
         def reduce_fn(self, key, values):
             # Do a reduction on values with key 
             yield (reduced_key, reduced_value)
-            
+    
+    # Get some input
+    input = ...
+    
+    # Create job object
     job = MyJob()
     
-    results = job.run()
+    # Run the job and collect the output
+    results = job.run(input)
