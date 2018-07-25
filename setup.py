@@ -23,7 +23,9 @@ setup(
     author = 'Stephen Tierney',
     author_email = 'sjtrny@gmail.com',
     keywords = 'mockmr mapreduce map reduce education',
-    packages=find_packages(exclude=['examples', 'docs']),
+    packages=find_packages(exclude=['examples', 'docs', 'build', 'dist']),
+    install_requires=['pandas'],
+    python_requires='>=3',
     classifiers = [
         'License :: OSI Approved :: MIT License',
       ]

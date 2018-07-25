@@ -1,5 +1,7 @@
 # Build Instructions for pypi
 
+https://packaging.python.org/guides/distributing-packages-using-setuptools/
+
 1. Update version number
 
 2. Make universal wheel
