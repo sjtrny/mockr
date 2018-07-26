@@ -15,7 +15,7 @@ with open(path.join(path.dirname(__file__), 'README.md'), encoding='utf-8') as f
 
 setup(
     name = "mockmr",
-    version = "0.3",
+    version = "0.31",
     description = "A Python library for prototyping MapReduce jobs",
     long_description = long_description,
     long_description_content_type = 'text/markdown',
