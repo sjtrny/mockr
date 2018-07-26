@@ -53,7 +53,7 @@ Output::
 
    [('mean', 30.090000000000003)]
 
-Python
+Python Sequences (list etc)
 -----------------
 
 Counting the number of times each word occurs in a list of strings.

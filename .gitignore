@@ -32,3 +32,4 @@ tests/report/
 .idea/mockmr.iml
 .idea/modules.xml
 .idea/vcs.xml
+.idea/*

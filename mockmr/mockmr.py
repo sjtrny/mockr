@@ -4,197 +4,172 @@ from itertools import chain
 import collections
 from collections import defaultdict
 import pandas as pd
+import inspect
 
-class MockJob(object):
+def __abstract_map_fn(chunk):
+    """Abstract Map function. Used internally to check user supplied function signatures.
+
+    This function recieves a chunk of your input data.
+
+    To pass data to a Reduce function you must yield at least one (key, value).
+
+    Args:
+        chunk (object): Chunk, the object to be processed in this map function
+
     """
-    MapReduce Job base class
+    raise NotImplementedError("Please implement this method")
+
+def __abstract_reduce_fn(key, values):
+    """Abstract Reduce Function. Used internally to check user supplied function signatures.
+
+    This function recieves data from the map function. To return final data your reduce function should yield at
+    least one (key, output) pair.
+
+    Args:
+        key (object): Unique identifier for a set of values. This is set by one of your map functions.
+        value (object): Output from a map function associated with key.
+
+    """
+    raise NotImplementedError("Please implement this method")
+
+def __run_job(chunks, map_fn, reduce_fn):
+    """Runs the MapReduce job for this instance.
+
+    Internal use only.
+
+    Args:
+        chunks (list): List of chunk objects
+    """
+
+    # A list of processed lines
+    m_generator_list = []
+
+    # For each line call the map function
+    # For each key call the reduce function
+    for chunk in chunks:
+        mapped_generator = map_fn(chunk)
+        m_generator_list.append(mapped_generator)
+
+    m_generator_chain = chain.from_iterable(m_generator_list)
+
+    # Key is the key, value is a list of the values
+    shuffled_dict = defaultdict(list)
+
+    for kv_tuple in m_generator_chain:
+        shuffled_dict[kv_tuple[0]].append(kv_tuple[1])
+
+    r_generator_list = []
+    for k, v in shuffled_dict.items():
+        gen_v = (n for n in v)
+        reduced_generator = reduce_fn(k, gen_v)
+        r_generator_list.append(reduced_generator)
+
+    results = []
+    for thing in r_generator_list:
+        results.append(list(thing)[0])
+
+    return results
+
+def __validate_functions(map_fn, reduce_fn):
+
+    if inspect.signature(map_fn).parameters != inspect.signature(__abstract_map_fn).parameters:
+        raise ValueError("Map function arguments do not match required function signature")
+
+    if inspect.signature(reduce_fn).parameters != inspect.signature(__abstract_reduce_fn).parameters:
+        raise ValueError("Reduce function arguments do not match required function signature")
+
+
+def run_sequence_job(input_data, map_fn, reduce_fn, n_chunks = None):
+    """
+    ``run_sequence_job`` expects ``input_data`` to be of type ``Collections.abc.Sequence`` e.g. Python List. Sequence Jobs provide two exection methods:
+        - the sequence is divided into chunks and each chunk is sent to a separate map worker
+        - each item in the list is individually sent to a dedicated map worker
 
     Notes
     -----
-    This class is not intended for direct use. Use one of the Child classes or define your own.
+    - ``input_data`` must be able to divide evenly into chunk size pieces
+    - you may wish to pre-shuffle your input_data
+
+    Args:
+        input_data (Collections.abc.Sequence): Sequence type holding data items e.g. Python ``list`` of ``str``
+        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple
+        reduce_fn: a reduce function with signature ``(key, value)`` that yields a single ``(key, result)`` tuple
+        n_chunks (int): The number of chunks to divide the input_data into. When ``n_chunks = None`` we assign a map
+           function to each item of input_data. When ``n_chunks = int`` means that we create ``int`` chunks of data, each
+           worker gets a chunk (sublist). ``input_data`` must be able to divide evenly into chunk size pieces
     """
 
-    def map_fn(self, key, chunk):
-        """Abstract Map function. Inherit from one of the child classes and define your own.
+    if not isinstance(input_data, collections.abc.Sequence) or isinstance(input_data, str):
+        raise ValueError("input_data must be of type Sequence (i.e. indexable such as a list)")
 
-        This function recieves a chunk of your input data.
+    __validate_functions(map_fn, reduce_fn)
 
-        To pass data to a Reduce function you must yield at least one (key, value).
+    if n_chunks == None:
+        return __run_job(input_data, map_fn, reduce_fn)
 
-        Args:
-            key (object): Key associated with the chunk, currently unused. This value will always be an empty string.
-            chunk (object): Chunk, the object to be processed in this map function
+    if not isinstance(n_chunks, int) or n_chunks <= 0:
+        raise ValueError("n_chunks must be a positive int")
 
-        """
-        raise NotImplementedError("Please implement this method")
+    # Divide input_data into chunks
+    chunk_size = len(input_data) / n_chunks
 
-    def reduce_fn(self, key, value):
-        """Abstract Reduce Function. Inherit from one of the child classes and define your own.
+    chunks = []
+    for i in range(n_chunks):
+        start_pos = int(i * chunk_size)
+        end_pos = int(start_pos + chunk_size)
+        current_chunk = input_data[start_pos:end_pos]
+        chunks.append(current_chunk)
 
-        This function recieves data from the map function. To return final data your reduce function should yield at
-        least one (key, output) pair.
+    return __run_job(chunks, map_fn, reduce_fn)
 
-        Args:
-            key (object): Unique identifier for a set of values. This is set by one of your map functions.
-            value (object): Output from a map function associated with key.
-
-        """
-        raise NotImplementedError("Please implement this method")
-
-    def run(self, input_data, n_chunks = None):
-        """Abstract Run function. Inherit from one of the child classes and define your own.
-
-        This function runs the MapReduce job
-
-        Args:
-            input_data (object): Data to be processed, accepted types depends on sub-class definition
-            n_chunks (int): Number of chunks to break data into, functionalty depends on sub-class
-        """
-        raise NotImplementedError("Please implement this method")
-
-    def _run_job(self, chunks):
-        """Runs the MapReduce job for this instance.
-
-        Internal use only.
-
-        Args:
-            chunks (list): List of chunk objects
-        """
-
-        # A list of processed lines
-        m_generator_list = []
-
-        # For each line call the map function
-        # For each key call the reduce function
-        for chunk in chunks:
-            mapped_generator = self.map_fn("", chunk)
-            m_generator_list.append(mapped_generator)
-
-        m_generator_chain = chain.from_iterable(m_generator_list)
-
-        # Key is the key, value is a list of the values
-        shuffled_dict = defaultdict(list)
-
-        for kv_tuple in m_generator_chain:
-            shuffled_dict[kv_tuple[0]].append(kv_tuple[1])
-
-        r_generator_list = []
-        for k, v in shuffled_dict.items():
-            gen_v = (n for n in v)
-            reduced_generator = self.reduce_fn(k, gen_v)
-            r_generator_list.append(reduced_generator)
-
-        results = []
-        for thing in r_generator_list:
-            results.append(list(thing)[0])
-
-        return results
-
-class PythonJob(MockJob):
+def run_stream_job(input_data, map_fn, reduce_fn):
     """
-    PythonJob base class
+    ``run_stream_job`` expects the input to be a string. Newline (“n”) characters delimit “chunks” of data and each
+    line/chunk is sent to a separate map worker.
 
-    Notes
-    -----
-    PythonJob class expects input to be a Collections.abc.Sequence type object e.g. Python List. Python Jobs provide two exection methods:
-
-    - the sequence is divided into chunks and each chunk is sent to a separate map worker
-    - each item in the list is individually sent to a dedicated map worker
+    Args:
+        input_data (str): newline delimited string, each string is assigned to a map worker
+        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple
+        reduce_fn: a reduce function with signature ``(key, value)`` that yields a single ``(key, result)`` tuple
     """
+    if not isinstance(input_data, str):
+        raise ValueError("input_data must be of type str")
 
+    __validate_functions(map_fn, reduce_fn)
 
-    def run(self, input_data, n_chunks = None):
-        """Runs the MapReduce job for this instance.
+    lines = input_data.split("\n")
 
-        Notes
-        -----
-        - ``input_data`` must be able to divide evenly into chunk size pieces
-        - you may wish to pre-shuffle your input_data
+    return __run_job(lines, map_fn, reduce_fn)
 
-        Args:
-            input_data (Collections.abc.Sequence): Sequence type holding data items e.g. Python ``list`` of ``str``
-            n_chunks (int): The number of chunks to divide the input_data into. When ``n_chunks = None`` we assign a map
-               function to each item of input_data. When ``n_chunks = int`` means that we create ``int`` chunks of data, each
-               worker gets a chunk (sublist). ``input_data`` must be able to divide evenly into chunk size pieces
-        """
-
-        if not isinstance(input_data, collections.abc.Sequence) or isinstance(input_data, str):
-            raise ValueError("input_data must be of type Sequence (i.e. indexable such as a list)")
-
-        if n_chunks == None:
-            return self._run_job(input_data)
-
-        if not isinstance(n_chunks, int) or n_chunks <= 0:
-            raise ValueError("n_chunks must be a positive int")
-
-        # Divide input_data into chunks
-        chunk_size = len(input_data) / n_chunks
-
-        chunks = []
-        for i in range(n_chunks):
-            start_pos = int(i * chunk_size)
-            end_pos = int(start_pos + chunk_size)
-            current_chunk = input_data[start_pos:end_pos]
-            chunks.append(current_chunk)
-
-        return self._run_job(chunks)
-
-class StreamingJob(MockJob):
+def run_pandas_job(input_data, map_fn, reduce_fn, n_chunks = 4):
     """
-    StreamingJob base class
-
-    Notes
-    -----
-    StreamingJob class expects the input to be a string. Newline (“n”) characters delimit “chunks” of data and each
-     line/chunk is sent to a separate map worker.
-    """
-
-    def run(self, input_data, n_chunks = None):
-        """Runs the MapReduce job for this instance.
-
-        Args:
-            input_data (str): newline delimited string, each string is assigned to a map worker
-            n_chunks (int): ignored since the string is seperated by newlines and each string is treated as a chunk
-        """
-        if not isinstance(input_data, str):
-            raise ValueError("input_data must be of type str")
-
-        lines = input_data.split("\n")
-
-        return self._run_job(lines)
-
-class PandasJob(MockJob):
-    """
-    PandasJob base class
-
-    Notes
-    -----
-    PandasJob class expects input to be a Pandas DataFrame.The rows of the data frame are equally divided into chunks
+    ``run_pandas_job`` expects input to be a Pandas DataFrame.The rows of the data frame are equally divided into chunks
     and each chunk is sent to a separate map worker
+
+    Args:
+        input_data (pandas.DataFrame): pandas ``DataFrame`` to be processed
+        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple
+        reduce_fn: a reduce function with signature ``key, value)`` that yields a single ``(key, result)`` tuple
+        n_chunks (int): The number of chunks to divide the ``input_data`` into. ``input_data`` must be able to
+           divide evenly into chunk size pieces
     """
+    if not isinstance(input_data, pd.DataFrame):
+        raise ValueError("input_str must be of type Pandas DataFrame")
 
-    def run(self, input_data, n_chunks = 4):
-        """Runs the MapReduce job for this instance.
+    __validate_functions(map_fn, reduce_fn)
 
-        Args:
-            input_data (pandas.DataFrame): pandas ``DataFrame`` to be processed
-            n_chunks (int): The number of chunks to divide the ``input_data`` into. ``input_data`` must be able to
-               divide evenly into chunk size pieces
-        """
-        if not isinstance(input_data, pd.DataFrame):
-            raise ValueError("input_str must be of type Pandas DataFrame")
+    if not isinstance(n_chunks, int) or n_chunks <= 0:
+        raise ValueError("n_chunks must be a positive int")
 
-        if not isinstance(n_chunks, int) or n_chunks <= 0:
-            raise ValueError("n_chunks must be a positive int")
+    # Divide input_data into chunks
+    chunk_size = len(input_data) / n_chunks
 
-        # Divide input_data into chunks
-        chunk_size = len(input_data) / n_chunks
+    chunks = []
+    for i in range(n_chunks):
+        start_pos = int(i * chunk_size)
+        end_pos = int(start_pos + chunk_size)
+        current_chunk = input_data.iloc[start_pos:end_pos, :]
+        chunks.append(current_chunk)
 
-        chunks = []
-        for i in range(n_chunks):
-            start_pos = int(i * chunk_size)
-            end_pos = int(start_pos + chunk_size)
-            current_chunk = input_data.iloc[start_pos:end_pos, :]
-            chunks.append(current_chunk)
+    return __run_job(chunks, map_fn, reduce_fn)
 
-        return self._run_job(chunks)

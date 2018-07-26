@@ -1,23 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from mockmr.mockmr import PandasJob
+from mockmr.mockmr import run_pandas_job
 import pandas as pd
 
-class Averager(PandasJob):
-    # Calculates the mean of the Age column of a dataframe
+def map_fn(chunk):
+    subset_mean = chunk['Age'].mean()
+    yield ("mean", subset_mean)
 
-    def map_fn(self, _, subset_df):
-        subset_mean = subset_df['Age'].mean()
-        yield ("mean", subset_mean)
-
-    def reduce_fn(self, key, values):
-        list_values = list(values)
-        yield (key, sum(list_values)/len(list_values))
+def reduce_fn(key, values):
+    list_values = list(values)
+    yield (key, sum(list_values)/len(list_values))
 
 dataframe = pd.read_csv('ages.csv')
 
-job = Averager()
-
-results = job.run(dataframe, n_chunks=4)
+results = run_pandas_job(dataframe, map_fn, reduce_fn, n_chunks = 4)
 
 print(results)

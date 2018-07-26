@@ -1,26 +1,22 @@
 # -*- coding: utf-8 -*-
 
 import re
-from mockmr.mockmr import StreamingJob
+from mockmr.mockmr import run_stream_job
 
 WORD_RE = re.compile(r"[\w']+")
 
-class WordCounter(StreamingJob):
+def map_fn(chunk):
+    # yield each word in the line
+    for word in WORD_RE.findall(chunk):
+        yield (word.lower(), 1)
 
-    def map_fn(self, _, line):
-        # yield each word in the line
-        for word in WORD_RE.findall(line):
-            yield (word.lower(), 1)
-        
-    def reduce_fn(self, key, values):
-        yield (key, sum(values))
+def reduce_fn(key, values):
+    yield (key, sum(values))
 
 input_file = open("MobyDick.txt", 'r')
 
 input_str = input_file.read()
 
-job = WordCounter()
-
-results = job.run(input_str)
+results = run_stream_job(input_str, map_fn, reduce_fn)
 
 print(results)

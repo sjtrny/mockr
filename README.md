@@ -21,7 +21,7 @@ Full documentation available here [https://mockmr.readthedocs.io/](https://mockm
 StreamingJob class which expects the input to be a byte stream of characters. The chunks of data are separated by
 newline ("\n") characters. Each line is sent to a separate map worker.
 
-### Native Python Jobs
+### Native Python Sequence Jobs
 
 PythonJob class expects input to be a Collections.abc.Sequence type object e.g. Python List. Python Jobs provide two
 exection methods:
@@ -38,26 +38,22 @@ each chunk is sent to a separate map worker
 ## Example Usage
 
     import re
-    from mockmr.mockmr import StreamingJob
-    
+    from mockmr.mockmr import run_stream_job
+
     WORD_RE = re.compile(r"[\w']+")
-    
-    class WordCounter(StreamingJob):
-    
-        def map_fn(self, _, line):
-            # yield each word in the line
-            for word in WORD_RE.findall(line):
-                yield (word.lower(), 1)
-            
-        def reduce_fn(self, key, values):
-            yield (key, sum(values))
-    
+
+    def map_fn(chunk):
+        # yield each word in the line
+        for word in WORD_RE.findall(chunk):
+            yield (word.lower(), 1)
+
+    def reduce_fn(key, values):
+        yield (key, sum(values))
+
     input_str = "Hello!\nThis is a sample string.\nIt is very simple.\nGoodbye!"
-    
-    job = WordCounter()
-    
-    results = job.run(input_str)
-    
+
+    results = run_stream_job(input_str, map_fn, reduce_fn)
+
     print(results)
 
 Output:
