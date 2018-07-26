@@ -6,4 +6,3 @@ Class Documentation
 .. toctree::
    :maxdepth: 2
 .. automodule:: mockmr
-   :members:

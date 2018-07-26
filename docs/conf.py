@@ -174,5 +174,4 @@ texinfo_documents = [
 ]
 
 
-# autodoc_inherit_docstrings = False
-# autodoc_default_flags = ['members']
+autodoc_default_flags = ['members']
