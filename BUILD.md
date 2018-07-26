@@ -6,7 +6,7 @@ https://packaging.python.org/guides/distributing-packages-using-setuptools/
 
 2. Make universal wheel
 
-    `python setup.py bdist_wheel --universal`
+    `python setup.py bdist_wheel`
 
 3. Upload to pypi
     `twine upload dist/*`
