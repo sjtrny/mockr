@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from mockmr.mockmr import run_pandas_job
+from mockmr import run_pandas_job
 import pandas as pd
 
 def map_fn(chunk):
