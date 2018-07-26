@@ -79,24 +79,44 @@ def __validate_functions(map_fn, reduce_fn):
         raise ValueError("Reduce function arguments do not match required function signature")
 
 
+def run_stream_job(input_data, map_fn, reduce_fn):
+    """
+    ``run_stream_job`` expects the input to be a string. Newline (“n”) characters delimit “chunks” of data and each
+    line/chunk is sent to a separate map worker.
+
+    Args:
+        input_data (str): newline delimited string, each string is assigned to a map worker
+        map_fn: a function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple. ``chunk`` will
+            be a ``str``. The yielded ``key`` and ``value`` can be of any type, they will be passed to ``reduce_fn``.
+        reduce_fn: a reduce function with signature ``(key, value)`` that yields a single ``(key, result)`` tuple
+    """
+    if not isinstance(input_data, str):
+        raise ValueError("input_data must be of type str")
+
+    __validate_functions(map_fn, reduce_fn)
+
+    lines = input_data.split("\n")
+
+    return __run_job(lines, map_fn, reduce_fn)
+
 def run_sequence_job(input_data, map_fn, reduce_fn, n_chunks = None):
     """
     ``run_sequence_job`` expects ``input_data`` to be of type ``Collections.abc.Sequence`` e.g. Python List. Sequence Jobs provide two exection methods:
         - the sequence is divided into chunks and each chunk is sent to a separate map worker
         - each item in the list is individually sent to a dedicated map worker
 
-    Notes
-    -----
-    - ``input_data`` must be able to divide evenly into chunk size pieces
+    Notes:
+
     - you may wish to pre-shuffle your input_data
 
     Args:
         input_data (Collections.abc.Sequence): Sequence type holding data items e.g. Python ``list`` of ``str``.
         map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple. When
-            ``n_chunk = None`` then ``chunk`` will be a single item of ``input_data``. When  ``n_chunk = int`` then
+            ``n_chunk = None`` then ``chunk`` will be a single item of ``input_data``. When  ``n_chunks = int`` then
             ``chunk`` will be a sub-sequence of ``input_data`` of length ``len(input_data)/n_chunks``.
         reduce_fn: a reduce function with signature ``(key, value)`` that yields a single ``(key, result)`` tuple.
-        n_chunks (int): The number of chunks to divide the input_data into. See ``map_fn`` for more details and
+        n_chunks (int): The number of chunks to divide the input_data into. ``input_data`` must be able to
+           divide evenly into chunk size pieces. See ``map_fn`` for more details and
             defined behaviour.
     """
 
@@ -123,39 +143,25 @@ def run_sequence_job(input_data, map_fn, reduce_fn, n_chunks = None):
 
     return __run_job(chunks, map_fn, reduce_fn)
 
-def run_stream_job(input_data, map_fn, reduce_fn):
-    """
-    ``run_stream_job`` expects the input to be a string. Newline (“n”) characters delimit “chunks” of data and each
-    line/chunk is sent to a separate map worker.
-
-    Args:
-        input_data (str): newline delimited string, each string is assigned to a map worker
-        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple. ``chunk`` will
-            be a ``str``. The yielded ``key`` and ``value`` can be of any type, they will be passed to ``reduce_fn``.
-        reduce_fn: a reduce function with signature ``(key, value)`` that yields a single ``(key, result)`` tuple
-    """
-    if not isinstance(input_data, str):
-        raise ValueError("input_data must be of type str")
-
-    __validate_functions(map_fn, reduce_fn)
-
-    lines = input_data.split("\n")
-
-    return __run_job(lines, map_fn, reduce_fn)
 
 def run_pandas_job(input_data, map_fn, reduce_fn, n_chunks = 4):
     """
     ``run_pandas_job`` expects input to be a Pandas DataFrame.The rows of the data frame are equally divided into chunks
     and each chunk is sent to a separate map worker.
 
+    Notes:
+
+    - you may wish to pre-shuffle your input_data
+
     Args:
         input_data (pandas.DataFrame): pandas ``DataFrame`` to be processed.
-        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple. ``chunk`` will
-            be a ``pandas.DataFrame``. The yielded ``key`` and ``value`` can be of any type, they will be passed to
-            ``reduce_fn``.
-        reduce_fn: a reduce function with signature ``key, value)`` that yields a single ``(key, result)`` tuple
+        map_fn: a function with signature ``(chunk)`` that maps ``input_data`` to one or more ``(key, value)`` tuples,
+            which are emitted via yield. ``chunk`` will be a ``pandas.DataFrame`` that is a row-wise section of
+            ``input_data``. The yielded ``key`` and ``value`` can be of any type, they will be passed to ``reduce_fn``.
+            reduce_fn: a function with signature ``(key, value)`` that reduces one or more ``key, value`` pairs into a
+            single ``(key, result)`` tuple which is emitted via yield.
         n_chunks (int): The number of chunks to divide the ``input_data`` into. ``input_data`` must be able to
-           divide evenly into chunk size pieces
+           divide evenly into chunk size pieces.
     """
     if not isinstance(input_data, pd.DataFrame):
         raise ValueError("input_str must be of type Pandas DataFrame")
