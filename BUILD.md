@@ -10,4 +10,3 @@ https://packaging.python.org/guides/distributing-packages-using-setuptools/
 
 3. Upload to pypi
     `twine upload dist/*`
-

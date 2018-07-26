@@ -91,12 +91,13 @@ def run_sequence_job(input_data, map_fn, reduce_fn, n_chunks = None):
     - you may wish to pre-shuffle your input_data
 
     Args:
-        input_data (Collections.abc.Sequence): Sequence type holding data items e.g. Python ``list`` of ``str``
-        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple
-        reduce_fn: a reduce function with signature ``(key, value)`` that yields a single ``(key, result)`` tuple
-        n_chunks (int): The number of chunks to divide the input_data into. When ``n_chunks = None`` we assign a map
-           function to each item of input_data. When ``n_chunks = int`` means that we create ``int`` chunks of data, each
-           worker gets a chunk (sublist). ``input_data`` must be able to divide evenly into chunk size pieces
+        input_data (Collections.abc.Sequence): Sequence type holding data items e.g. Python ``list`` of ``str``.
+        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple. When
+            ``n_chunk = None`` then ``chunk`` will be a single item of ``input_data``. When  ``n_chunk = int`` then
+            ``chunk`` will be a sub-sequence of ``input_data`` of length ``len(input_data)/n_chunks``.
+        reduce_fn: a reduce function with signature ``(key, value)`` that yields a single ``(key, result)`` tuple.
+        n_chunks (int): The number of chunks to divide the input_data into. See ``map_fn`` for more details and
+            defined behaviour.
     """
 
     if not isinstance(input_data, collections.abc.Sequence) or isinstance(input_data, str):
@@ -129,7 +130,8 @@ def run_stream_job(input_data, map_fn, reduce_fn):
 
     Args:
         input_data (str): newline delimited string, each string is assigned to a map worker
-        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple
+        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple. ``chunk`` will
+            be a ``str``. The yielded ``key`` and ``value`` can be of any type, they will be passed to ``reduce_fn``.
         reduce_fn: a reduce function with signature ``(key, value)`` that yields a single ``(key, result)`` tuple
     """
     if not isinstance(input_data, str):
@@ -144,11 +146,13 @@ def run_stream_job(input_data, map_fn, reduce_fn):
 def run_pandas_job(input_data, map_fn, reduce_fn, n_chunks = 4):
     """
     ``run_pandas_job`` expects input to be a Pandas DataFrame.The rows of the data frame are equally divided into chunks
-    and each chunk is sent to a separate map worker
+    and each chunk is sent to a separate map worker.
 
     Args:
-        input_data (pandas.DataFrame): pandas ``DataFrame`` to be processed
-        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple
+        input_data (pandas.DataFrame): pandas ``DataFrame`` to be processed.
+        map_fn: a map function with signature ``(chunk)`` that yields one or more ``(key, value)`` tuple. ``chunk`` will
+            be a ``pandas.DataFrame``. The yielded ``key`` and ``value`` can be of any type, they will be passed to
+            ``reduce_fn``.
         reduce_fn: a reduce function with signature ``key, value)`` that yields a single ``(key, result)`` tuple
         n_chunks (int): The number of chunks to divide the ``input_data`` into. ``input_data`` must be able to
            divide evenly into chunk size pieces
