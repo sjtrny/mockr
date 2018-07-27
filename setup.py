@@ -1,5 +1,5 @@
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages
+from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 from os import path
@@ -13,7 +13,7 @@ with open(path.join(path.dirname(__file__), 'README.md'), encoding='utf-8') as f
 
 setup(
     name = "mockmr",
-    version = "0.31",
+    version = "0.36",
     description = "A Python library for prototyping MapReduce jobs",
     long_description = long_description,
     long_description_content_type = 'text/markdown',
@@ -21,7 +21,7 @@ setup(
     author = 'Stephen Tierney',
     author_email = 'sjtrny@gmail.com',
     keywords = 'mockmr mapreduce map reduce education',
-    packages=find_packages(exclude=['examples', 'docs', 'build', 'dist']),
+    py_modules=['mockmr'],
     install_requires=['pandas'],
     python_requires='>=3',
     classifiers = [
