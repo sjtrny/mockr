@@ -1,20 +1,20 @@
-[![Documentation Status](https://readthedocs.org/projects/mockmr/badge/?version=latest)](https://mockmr.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/mockr/badge/?version=latest)](https://mockr.readthedocs.io/en/latest/?badge=latest)
 
-# MockMR
+# mockr
 
-MockMR is a Python library for writing MapReduce jobs in an Educational setting. It is intended to be used as a
+mockr is a Python library for writing MapReduce jobs in an Educational setting. It is intended to be used as a
 conceptual teaching tool.
 
-MockMR provides an interface for defining and running MapReduce locally. Simply define your map and reduce functions,
+mockr provides an interface for defining and running MapReduce locally. Simply define your map and reduce functions,
 input your data and call the run function. Everything is run sequentially and locally.
 
 ## Installation
 
-    pip install mockmr
+    pip install mockr
 
 ## Documentation
 
-Full documentation available here [https://mockmr.readthedocs.io/](https://mockmr.readthedocs.io/)
+Full documentation available here [https://mockr.readthedocs.io/](https://mockr.readthedocs.io/)
 
 ### Streaming Jobs
 
@@ -38,7 +38,7 @@ each chunk is sent to a separate map worker
 ## Example Usage
 
     import re
-    from mockmr import run_stream_job
+    from mockr import run_stream_job
     
     WORD_RE = re.compile(r"[\w']+")
     

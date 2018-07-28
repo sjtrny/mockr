@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from mockmr import run_stream_job
+from mockr import run_stream_job
 
 WORD_RE = re.compile(r"[\w']+")
 

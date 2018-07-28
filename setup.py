@@ -12,7 +12,7 @@ with open(path.join(path.dirname(__file__), 'README.md'), encoding='utf-8') as f
 # Fields marked as "Optional" may be commented out.
 
 setup(
-    name = "mockmr",
+    name = "mockr",
     version = "0.36",
     description = "A Python library for prototyping MapReduce jobs",
     long_description = long_description,

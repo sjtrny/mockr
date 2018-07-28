@@ -1,18 +1,18 @@
-.. MockMR documentation master file, created by
+.. mockr documentation master file, created by
    sphinx-quickstart on Tue Jul 24 16:59:43 2018.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 .. https://wwoods.github.io/2016/06/09/easy-sphinx-documentation-without-the-boilerplate/
 
-MockMR (Mock MapReduce)
+mockr
 ====================
 
-MockMR is a Python library for writing MapReduce jobs in an educational setting. It is intended to be used as a conceptual teaching tool.
+mockr is a Python library for writing MapReduce jobs in an educational setting. It is intended to be used as a conceptual teaching tool.
 
-MockMR provides an interface for defining and running MapReduce locally. Simply define your map and reduce functions, input your data and call the run function. Everything is run sequentially and locally.
+mockr provides an interface for defining and running MapReduce locally. Simply define your map and reduce functions, input your data and call the run function. Everything is run sequentially and locally.
 
-.. note:: MockMR is only compatible with **Python 3**.
+.. note:: mockr is only compatible with **Python 3**.
 
 
 Installation
@@ -20,7 +20,7 @@ Installation
 
 Install via pip::
 
-    $ pip install mockmr
+    $ pip install mockr
 
 Documentation
 -----------------------------

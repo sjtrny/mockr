@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'MockMR'
+project = 'mockr'
 copyright = '2018, Stephen Tierney'
 author = 'Stephen Tierney'
 
@@ -120,7 +120,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'MockMRdoc'
+htmlhelp_basename = 'mockrdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -147,7 +147,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'MockMR.tex', 'MockMR Documentation',
+    (master_doc, 'mockr.tex', 'mockr Documentation',
      'Stephen Tierney', 'manual'),
 ]
 
@@ -157,7 +157,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'mockmr', 'MockMR Documentation',
+    (master_doc, 'mockr', 'mockr Documentation',
      [author], 1)
 ]
 
@@ -168,8 +168,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'MockMR', 'MockMR Documentation',
-     author, 'MockMR', 'One line description of project.',
+    (master_doc, 'mockr', 'mockr Documentation',
+     author, 'mockr', 'One line description of project.',
      'Miscellaneous'),
 ]
 
