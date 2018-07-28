@@ -2,7 +2,7 @@
 
 # mockr
 
-mockr is a Python library for writing MapReduce jobs in an Educational setting. It is intended to be used as a
+mockr (pronounced "mocker") is a Python library for writing MapReduce jobs in an Educational setting. It is intended to be used as a
 conceptual teaching tool.
 
 mockr provides an interface for defining and running MapReduce locally. Simply define your map and reduce functions,
