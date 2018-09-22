@@ -1,5 +1,4 @@
 [![Documentation Status](https://readthedocs.org/projects/mockr/badge/?version=latest)](https://mockr.readthedocs.io/en/latest/?badge=latest)
-
 [![Downloads](https://pepy.tech/badge/mockr)](https://pepy.tech/project/mockr)
 
 # mockr
